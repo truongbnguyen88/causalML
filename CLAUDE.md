@@ -94,6 +94,15 @@ Create **high-quality, detailed educational materials** for learning causal infe
 - **Type-hinted** - Use Python type hints where appropriate
 - **Tested** - Include simple assertions to verify correctness
 - **Reproducible** - Set random seeds for consistency
+- **Dependencies tracked** - All libraries used must be in `requirements.txt`
+
+**Dependency Management**:
+- **BEFORE** writing code that imports a library, check if it's in `requirements.txt`
+- **IF NOT** in requirements.txt, add it with appropriate version constraint
+- Use version constraints: `>=` for minimum version (e.g., `numpy>=1.21.0`)
+- Add comment in requirements.txt explaining what the library is for
+- Common libraries already included: numpy, pandas, matplotlib, seaborn, scikit-learn, econml, dowhy, causalml
+- For specialized libraries (e.g., specific plotting tools, advanced methods), add with comment explaining use case
 
 **Code Style**:
 ```python
