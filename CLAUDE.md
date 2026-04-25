@@ -35,6 +35,14 @@ Create **high-quality, detailed educational materials** for learning causal infe
 - **DO NOT** re-read a file you've already accessed unless it has been modified
 - Keep track of what you know from previous reads in the conversation
 
+### 5. Compact Explanations
+- When user asks for explanations or clarifications (not content creation), be **concise and focused**
+- Provide **essential information only** - avoid verbose exposition
+- Use **examples sparingly** - 1-2 key examples maximum
+- **Target length**: 500-1000 words for concept explanations (not 3000+)
+- If creating a supplementary file based on explanations, **compactify** before writing
+- Only expand to longer formats when user explicitly requests comprehensive coverage
+
 ---
 
 ## Content Quality Standards
