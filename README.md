@@ -1,1 +1,2 @@
-Starting file...
+- See CURRICULUM.md for course description
+- See CLAUDE.md for implementation instructions of codes in each module
