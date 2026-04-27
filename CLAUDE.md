@@ -137,13 +137,25 @@ weights = 1 / propensity_scores[treatment == 1]
 
 ### For Exercise Files
 
-**Structure**:
+**IMPORTANT: Always create TWO separate notebooks for exercises:**
+
+1. **`<topic>_exercises.ipynb`** - Exercises only (no solutions)
+2. **`<topic>_solutions.ipynb`** - Complete solutions
+
+Both files go in the `exercises/` subdirectory of the module.
+
+**Exercises Notebook Structure** (`*_exercises.ipynb`):
 1. **Problem Statement** - Clear description of what to do
 2. **Learning Goal** - What skill this exercise develops
-3. **Hints** - 2-3 progressive hints (in collapsible sections if possible)
-4. **Starter Code** - Template to fill in (if appropriate)
-5. **Solution** - Complete, well-commented solution
-6. **Discussion** - Why this approach works, alternatives
+3. **Hints** - 2-3 progressive hints (in collapsible `<details>` sections)
+4. **Starter Code** - Template with TODOs for students to fill in
+5. **Reference** - Note that solutions are in separate file
+
+**Solutions Notebook Structure** (`*_solutions.ipynb`):
+1. **Complete Code** - Fully implemented solution
+2. **Explanations** - Comments explaining each step
+3. **Visualizations** - Plots showing results
+4. **Discussion** - Why this approach works, alternatives, real-world applications
 
 **Difficulty Levels**:
 - **Easy** (40%): Direct application of concepts from notebook
