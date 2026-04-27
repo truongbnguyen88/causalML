@@ -324,6 +324,39 @@ Most causal knowledge in medicine, economics, and policy comes from observationa
 
 ---
 
+## Why Controlling for Mediators Blocks the Causal Effect
+
+### The Core Issue
+
+When you control for a mediator, you're blocking the causal pathway you want to measure.
+
+### Example: Drug → Blood Pressure → Heart Attack
+
+If you control for blood pressure in a regression:
+- You're asking: "What's the effect of the drug, **holding blood pressure constant**?"
+- But the drug **works through** lowering blood pressure
+- By forcing blood pressure to be the same in treated and control groups, you eliminate the mechanism by which the drug operates
+
+**Result**: You'll find no effect (or a much smaller effect), not because the drug doesn't work, but because you blocked the pathway through which it works.
+
+### General Principle
+
+**Structure**: Treatment → Mediator → Outcome
+
+- Controlling for the mediator removes the indirect effect
+- You only capture the direct effect (if any exists)
+
+### When to Control for Mediators
+
+Only if you specifically want to measure the **direct effect** while shutting down the indirect pathway. For **total causal effect**, don't control for mediators.
+
+### Contrast with Confounders
+
+- **Confounder** (Z → Treatment, Z → Outcome): **Control** to remove bias
+- **Mediator** (Treatment → M → Outcome): **Don't control** if you want total effect
+
+---
+
 ## Why You Should Never Control for Colliders
 
 ### The Core Issue
