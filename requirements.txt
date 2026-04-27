@@ -56,6 +56,9 @@ faker>=8.0.0
 # Uncomment for faster computation on large datasets
 # numba>=0.54.0
 
+# Notebook output stripping for version control
+nbstripout>=0.6.0
+
 # Development tools (optional)
 # Uncomment for development/testing
 # pytest>=6.2.0
