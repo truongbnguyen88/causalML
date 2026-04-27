@@ -324,4 +324,74 @@ Most causal knowledge in medicine, economics, and policy comes from observationa
 
 ---
 
+## Why You Should Never Control for Colliders
+
+### The Core Issue
+
+A **collider** is a variable that is caused by two other variables. In the structure X → C ← Y, the variable C is a collider because both X and Y point into it.
+
+**Key principle**: When X and Y are initially independent (no arrow between them), conditioning on their common effect C creates a spurious association between them.
+
+### The Mechanism: Explaining Away
+
+When you observe the collider C, you create an informational dependency between its causes:
+
+- If you learn that X is high, this "explains" the observed value of C, making Y less likely to be high
+- If you learn that Y is high, this "explains" C, making X less likely to be high
+
+The causes compete to explain the observed effect - this is called **explaining away**.
+
+### Example: NBA Players
+
+**Setup:**
+- **Talent** → NBA Player ← **Height**
+- In the general population, talent and height are independent (correlation ≈ 0)
+- Both increase your chances of making the NBA
+
+**What happens when we condition on being an NBA player?**
+
+Among NBA players, talent and height become **negatively correlated**:
+- Very tall players may have made it with moderate talent
+- Shorter players probably have exceptional talent to compensate
+
+This creates spurious negative correlation where none existed in the population!
+
+### Statistical Mechanism
+
+**Before conditioning**: P(X, Y) = P(X) × P(Y) — they're independent
+
+**After conditioning on C**: P(X, Y | C) ≠ P(X | C) × P(Y | C) — they're now dependent
+
+The conditioning breaks the independence by creating selection on a variable that both X and Y influence.
+
+### Why This Creates Selection Bias
+
+If you're trying to estimate the causal effect of X on Y and you control for collider C:
+
+**Correct approach:**
+- Don't control for C
+- X and Y remain independent (no confounding, no bias)
+
+**Wrong approach:**
+- Control for C (include as covariate in regression)
+- Creates spurious association between X and Y
+- Your causal estimate is now biased by the induced correlation
+
+### Contrast with Confounders
+
+This is opposite to confounders:
+
+- **Confounder** (X ← Z → Y): You **must** control for it to block bias
+- **Collider** (X → C ← Y): You **must not** control for it to avoid creating bias
+
+### The DAG Rule
+
+**Never control for:**
+1. Colliders themselves (X → C ← Y)
+2. Descendants of colliders (anything caused by C)
+
+Doing so opens a "backdoor path" through the collider, creating bias where none existed before.
+
+---
+
 *Return to [01_intro_causality.md](01_intro_causality.md)*
