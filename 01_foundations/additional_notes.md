@@ -324,6 +324,52 @@ Most causal knowledge in medicine, economics, and policy comes from observationa
 
 ---
 
+## Simpson's Paradox
+
+### Definition
+
+**Simpson's Paradox** occurs when a trend or association that appears in several subgroups **reverses or disappears** when the subgroups are combined. This happens due to a confounding variable that affects both the treatment and outcome differently across groups.
+
+**In causal inference terms**: The naive (unadjusted) estimate and the adjusted estimate (controlling for a confounder) have **opposite signs** or substantially different magnitudes.
+
+### Classic Example: UC Berkeley Admissions (1973)
+
+**Setup**: UC Berkeley was sued for gender bias in graduate admissions.
+
+**Overall data** (Combined):
+- Men: 44% admitted
+- Women: 35% admitted
+- **Conclusion**: Appears biased against women!
+
+**Department-level data** (Subgroups):
+
+| Department | Men Applied | Men Admitted | Women Applied | Women Admitted |
+|------------|-------------|--------------|---------------|----------------|
+| A          | 825         | 62%          | 108           | 82%            |
+| B          | 560         | 63%          | 25            | 68%            |
+| C          | 325         | 37%          | 593           | 34%            |
+| D          | 417         | 33%          | 375           | 35%            |
+| E          | 191         | 28%          | 393           | 24%            |
+| F          | 373         | 6%           | 341           | 7%             |
+
+**Within each department**: Women have similar or **higher** admission rates than men!
+
+**The Paradox**: 
+- Overall: Men admitted more (bias appears to favor men)
+- By department: Women admitted at similar/higher rates (no bias or favors women)
+
+**Explanation** (The Confounder):
+- **Department** is the confounder
+- Women applied more to competitive departments (C, E, F) with low admission rates
+- Men applied more to less competitive departments (A, B) with high admission rates
+- The different application patterns created the spurious overall association
+
+**The reversal**: Controlling for department reverses the apparent bias.
+
+This is Simpson's Paradox: the aggregate data suggests one conclusion, but the disaggregated data shows the opposite.
+
+---
+
 ## Why Controlling for Mediators Blocks the Causal Effect
 
 ### The Core Issue
