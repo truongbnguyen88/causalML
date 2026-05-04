@@ -435,6 +435,52 @@ Among NBA players, talent and height become **negatively correlated**:
 
 This creates spurious negative correlation where none existed in the population!
 
+### Example: Exercise and Heart Disease (Backdoor Path)
+
+**Setup:**
+```
+Exercise → Heart_Disease (true causal: exercise PREVENTS disease)
+   ↓              ↓
+   → Hospitalization ←
+```
+
+**The Question:** Does exercise reduce heart disease?
+
+**The Collider:** Hospitalization is caused by both Exercise and Heart_Disease
+- Exercise → Hospitalization (injuries, accidents)
+- Heart_Disease → Hospitalization (cardiac events)
+
+**Without controlling for Hospitalization:**
+
+Study the general population:
+- The path Exercise → Hospitalization ← Heart_Disease is **BLOCKED** (collider blocks it)
+- Exercisers have lower heart disease rates ✓
+- Non-exercisers have higher heart disease rates ✓
+- You correctly see that exercise prevents heart disease
+
+**When controlling for Hospitalization (studying only hospitalized patients):**
+
+The path Exercise → **[Hospitalization]** ← Heart_Disease becomes **OPEN** (conditioning unblocks the collider).
+
+This creates a **backdoor path** that introduces selection bias:
+
+Among hospitalized patients:
+- **Exercisers** are likely hospitalized for injuries/accidents (NOT heart disease)
+  - Healthy heart, but hospitalized for other reasons
+- **Non-exercisers** are likely hospitalized for heart disease
+  - Unhealthy heart, that's why they're there
+
+**Result:** Among hospitalized patients, exercisers appear to have LESS heart disease than the true causal effect suggests, or the relationship might even reverse!
+
+**The backdoor path:** Exercise → Hospitalization ← Heart_Disease
+- Blocked naturally (when not controlling) → no bias ✓
+- Opens when controlling for Hospitalization → creates selection bias ✗
+
+**Why it's called a "backdoor path":**
+- The "front door" = Exercise → Heart_Disease (causal pathway)
+- The "back door" = Exercise → Hospitalization ← Heart_Disease (non-causal, spurious)
+- Controlling for the collider "opens the back door" allowing bias to flow through
+
 ### Statistical Mechanism
 
 **Before conditioning**: P(X, Y) = P(X) × P(Y) — they're independent
@@ -442,6 +488,31 @@ This creates spurious negative correlation where none existed in the population!
 **After conditioning on C**: P(X, Y | C) ≠ P(X | C) × P(Y | C) — they're now dependent
 
 The conditioning breaks the independence by creating selection on a variable that both X and Y influence.
+
+### What Does "Controlling" Mean?
+
+"Controlling for a variable" means making statistical adjustments to compare units that have the same value of that variable. Common methods include:
+
+**1. Regression Adjustment** (Most Common)
+- Include the variable as a covariate in your model
+- Example: `Y ~ X + C` instead of `Y ~ X`
+- You're asking: "What's the effect of X, **holding C constant**?"
+
+**2. Stratification**
+- Divide data into groups based on the variable
+- Analyze within each group, then combine results
+- Example: Analyze separately for C=low, C=medium, C=high
+
+**3. Matching**
+- For each treated unit, find controls with the same value of the variable
+- Compare only matched pairs
+- Example: Match treated and control units on C
+
+**4. Conditioning/Filtering**
+- Restrict analysis to a specific value of the variable
+- Example: Only analyze data where C = 5
+
+**The key**: All these methods compare units with the same (or similar) value of the controlled variable.
 
 ### Why This Creates Selection Bias
 
@@ -452,9 +523,16 @@ If you're trying to estimate the causal effect of X on Y and you control for col
 - X and Y remain independent (no confounding, no bias)
 
 **Wrong approach:**
-- Control for C (include as covariate in regression)
+- Control for C (include as covariate in regression, stratify by C, match on C, etc.)
 - Creates spurious association between X and Y
 - Your causal estimate is now biased by the induced correlation
+
+**Why controlling for a collider creates bias:**
+- Without controlling: You compare all X values to all Y values (independent)
+- When controlling: You compare X and Y **within each level of C**
+- Since C is caused by both X and Y, conditioning on C creates an informational dependency
+- If C is high and X is low, then Y must be high to "explain" C
+- This induced dependency creates spurious correlation between X and Y
 
 ### Contrast with Confounders
 
