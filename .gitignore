@@ -71,6 +71,9 @@ Thumbs.db
 *.log
 .env
 
+# Extra files (generated pdf from notebooks, etc.)
+additional_pdfs/
+
 # Data files (optional - uncomment if you don't want to commit large datasets)
 # *.csv
 # *.parquet
