@@ -404,6 +404,8 @@ After controlling for Z:
 
 **Ultimately requires subject-matter judgment!**
 
+**Note:** See `additional_notes.md` for a detailed concrete example of ignorability with the online bootcamp scenario.
+
 ---
 
 ## Comparing Identification Strategies
@@ -423,29 +425,206 @@ After controlling for Z:
 3. **Try IV if** you have credible exogenous variation
 4. **If none work** → Consider experimental design or give up on causal claims
 
+**Note:** See `additional_notes.md` for detailed discussion on using multiple identification strategies simultaneously for robustness checking.
+
 ---
 
 ## do-Calculus: The General Framework
 
 ### What is do-Calculus?
 
-**do-calculus** is a set of rules for manipulating expressions involving interventions (do-operators). It generalizes backdoor and frontdoor criteria.
+**do-calculus** is a formal system of rules developed by Judea Pearl that allows us to derive whether a causal effect is identifiable from observational data, given a causal graph (DAG). It provides a mechanical way to transform causal queries (with the "do" operator) into statistical queries (without "do") that can be estimated from data.
 
-**Three rules** (Pearl, 1995):
+### The Core Problem
 
-**Rule 1 (Ignoring observations):**
-$$P(Y | do(X), Z, W) = P(Y | do(X), W) \text{ if } Y \perp Z | X, W \text{ in } G_{\overline{X}}$$
+We want to know: **P(Y | do(X = x))** — the probability distribution of Y when we intervene to set X to value x.
 
-**Rule 2 (Action/observation exchange):**
-$$P(Y | do(X), do(Z), W) = P(Y | do(X), Z, W) \text{ if } Y \perp Z | X, W \text{ in } G_{\overline{X}, \underline{Z}}$$
+But we only have observational data, which gives us: **P(Y | X = x)** — the probability distribution of Y when we observe X = x (no intervention).
 
-**Rule 3 (Ignoring actions):**
-$$P(Y | do(X), do(Z), W) = P(Y | do(X), W) \text{ if } Y \perp Z | X, W \text{ in } G_{\overline{X}, \overline{Z(W)}}$$
+**These are different!** Observational data includes confounding; interventional data does not.
 
-**Notation:**
-- $G_{\overline{X}}$: Graph with arrows INTO X removed
-- $G_{\underline{X}}$: Graph with arrows OUT OF X removed
-- $G_{\overline{Z(W)}}$: Graph with arrows into Z that aren't from W removed
+**do-Calculus provides three rules** that let us transform P(Y | do(X)) into expressions involving only observational probabilities P(·), if identification is possible.
+
+### The Three Rules of do-Calculus
+
+Before stating the rules, understand the notation:
+- **P(y | do(x), z)** means: the probability of Y = y, given we intervene to set X = x and observe Z = z
+- **G_X̄** means: the graph G with all arrows **into** X removed (simulating intervention on X)
+- **G_X** means: the graph G with all arrows **out of** X removed
+- **G_X̄Z** means: remove arrows into X and remove arrows into Z
+- **(Y ⊥ Z | W)_G** means: Y is independent of Z given W in graph G
+
+---
+
+### Rule 1: Insertion/Deletion of Observations
+
+**Statement:**
+$$P(Y | do(X), Z, W) = P(Y | do(X), W) \text{ if } (Y \perp Z | X, W) \text{ in } G_{\overline{X}}$$
+
+**Plain English:** If Z is independent of Y given X and W in the manipulated graph G_X̄ (where arrows into X are removed), then we can **ignore** Z when computing the effect of do(X) on Y.
+
+**Intuition:** Once we've intervened on X (cutting incoming arrows), if Z provides no additional information about Y beyond what X and W already tell us, then Z is irrelevant — we can drop it from our conditioning set.
+
+#### Concrete Example: Rule 1 - Exercise and Heart Health
+
+**Scenario:** Effect of Exercise (X) on Heart Health (Y)
+
+```
+Causal Graph G:
+    Age (Z) → Exercise (X) → Heart Health (Y)
+            ↘               ↗
+              Body Weight (W)
+```
+
+Age affects both exercise habits and heart health; Body Weight is affected by Age and affects Heart Health.
+
+**Question:** Does Age (Z) matter when estimating P(Y | do(X), W)?
+
+**Step 1:** Create G_X̄ (remove arrows into X):
+```
+G_X̄:
+    Age (Z)    Exercise (X) → Heart Health (Y)
+            ↘               ↗
+              Body Weight (W)
+```
+
+The arrow Age → Exercise is removed (we're intervening on Exercise).
+
+**Step 2:** Check independence in G_X̄:
+
+Is (Y ⊥ Z | X, W) in G_X̄?
+
+Given Exercise level (X) and Body Weight (W), is Heart Health (Y) independent of Age (Z)?
+
+Looking at G_X̄:
+- Age → Body Weight → Heart Health (this path is blocked by conditioning on W)
+- There's no other path from Age to Heart Health that isn't blocked
+
+**Yes!** (Y ⊥ Z | X, W) in G_X̄
+
+**Conclusion (by Rule 1):**
+$$P(Y | do(X), Z, W) = P(Y | do(X), W)$$
+
+We can **ignore Age** when estimating the effect of exercise on heart health, as long as we condition on Body Weight.
+
+**Practical implication:** You don't need to collect or control for Age if you're already controlling for Body Weight when estimating this causal effect.
+
+---
+
+### Rule 2: Action/Observation Exchange
+
+**Statement:**
+$$P(Y | do(X), do(Z), W) = P(Y | do(X), Z, W) \text{ if } (Y \perp Z | X, W) \text{ in } G_{\overline{X}, \overline{Z}}$$
+
+**Plain English:** If Z is independent of Y given X and W in the graph G_X̄Z (where arrows into both X and Z are removed), then intervening on Z is the same as merely observing Z — we can replace do(Z) with observed Z.
+
+**Intuition:** If there are no confounders between Z and Y (after intervening on X and Z), then the observational association between Z and Y is the same as the causal effect. This lets us "downgrade" an intervention do(Z) to a passive observation Z.
+
+#### Concrete Example: Rule 2 - Drug, Exercise, and Recovery
+
+**Scenario:** Effect of Drug Dose (X) and Exercise (Z) on Recovery (Y)
+
+```
+Causal Graph G:
+    Genes (C) → Exercise (Z) → Fitness (M) → Recovery (Y)
+              ↘                              ↗
+                      Drug Dose (X) ──────────
+```
+
+Genes confound Exercise and Recovery (through Fitness); Drug Dose directly affects Recovery; Exercise affects Recovery only through Fitness.
+
+**Question:** Can we replace P(Y | do(X), do(Z), M) with P(Y | do(X), Z, M)?
+
+**Step 1:** Create G_X̄Z (remove arrows into X and into Z):
+```
+G_X̄Z:
+    Genes (C)    Exercise (Z) → Fitness (M) → Recovery (Y)
+                                              ↗
+                       Drug Dose (X) ──────────
+```
+
+**Step 2:** Check independence in G_X̄Z:
+
+Is (Y ⊥ Z | X, M) in G_X̄Z?
+
+Given Drug Dose (X) and Fitness level (M), is Recovery (Y) independent of Exercise (Z)?
+
+Looking at G_X̄Z:
+- Path Z → M → Y is blocked by conditioning on M
+- No confounding path exists (arrow from Genes to Z was removed)
+- X and Z don't interact in their effect on Y
+
+**Yes!** (Y ⊥ Z | X, M) in G_X̄Z
+
+**Conclusion (by Rule 2):**
+$$P(Y | do(X), do(Z), M) = P(Y | do(X), Z, M)$$
+
+**Practical implication:** If we're already intervening on Drug Dose and observing Fitness level, then we don't need to intervene on Exercise — just observing the exercise level is sufficient. This is because once we condition on Fitness (the mediator), Exercise's effect is captured, and there's no confounding.
+
+---
+
+### Rule 3: Insertion/Deletion of Actions
+
+**Statement:**
+$$P(Y | do(X), do(Z), W) = P(Y | do(X), W) \text{ if } (Y \perp Z | X, W) \text{ in } G_{\overline{X}, \overline{Z(W)}}$$
+
+Where G_X̄Z̄(W) means: remove arrows into X, remove arrows into Z, keep only arrows from W.
+
+**Plain English:** If Z is independent of Y given X and W in the graph where we've removed all incoming arrows to both X and Z (and kept only W's influence), then intervening on Z has no effect — we can completely remove do(Z).
+
+**Intuition:** If Z doesn't affect Y (even when we intervene on both X and Z), then the intervention on Z is irrelevant to estimating the effect on Y. This is the strongest rule — it lets us completely drop an intervention.
+
+#### Concrete Example: Rule 3 - Medication and Room Temperature
+
+**Scenario:** Effect of Medication (X) and Room Temperature (Z) on Recovery (Y)
+
+```
+Causal Graph G:
+    Severity (C) → Medication (X) → Recovery (Y)
+                 ↘                
+                   Room Temp (Z)
+```
+
+Severity affects both Medication choice and Room Temperature; Medication affects Recovery; Room Temperature does NOT affect Recovery (just a spurious correlation).
+
+**Question:** Can we ignore do(Z) when computing P(Y | do(X), do(Z))?
+
+**Step 1:** Create G_X̄Z̄ (remove arrows into X and into Z):
+```
+G_X̄Z̄:
+    Severity (C)    Medication (X) → Recovery (Y)
+                                  
+                      Room Temp (Z)
+```
+
+All arrows into X and Z are removed.
+
+**Step 2:** Check independence in G_X̄Z̄:
+
+Is (Y ⊥ Z | X) in G_X̄Z̄?
+
+Given Medication (X), is Recovery (Y) independent of Room Temperature (Z)?
+
+Looking at G_X̄Z̄:
+- There's no path from Z to Y at all
+- Z is completely disconnected from Y
+
+**Yes!** (Y ⊥ Z | X) in G_X̄Z̄
+
+**Conclusion (by Rule 3):**
+$$P(Y | do(X), do(Z)) = P(Y | do(X))$$
+
+**Practical implication:** Room temperature has no causal effect on recovery — intervening on it is useless. We can completely ignore it. The only reason room temperature might correlate with recovery in observational data is because of the common cause (severity), but once we intervene on medication, room temperature is irrelevant.
+
+---
+
+### Summary of the Three Rules
+
+| Rule | What it does | When it applies | What you can do |
+|------|-------------|-----------------|-----------------|
+| **Rule 1: Insertion/Deletion of Observations** | Remove an observed variable from conditioning set | (Y ⊥ Z \| X, W) in G_X̄ | Drop Z from P(y \| do(x), z, w) → P(y \| do(x), w) |
+| **Rule 2: Action/Observation Exchange** | Convert an intervention to an observation | (Y ⊥ Z \| X, W) in G_X̄Z | Change do(z) to z: P(y \| do(x), do(z), w) → P(y \| do(x), z, w) |
+| **Rule 3: Insertion/Deletion of Actions** | Remove an intervention entirely | (Y ⊥ Z \| X, W) in G_X̄Z̄(W) | Drop do(z): P(y \| do(x), do(z), w) → P(y \| do(x), w) |
 
 ### Why It Matters
 
@@ -454,10 +633,57 @@ do-calculus allows you to:
 2. **Derive identification formulas** algorithmically
 3. **Unify backdoor, frontdoor, and IV** as special cases
 
-**Practical use:** Most analysts use backdoor/frontdoor/IV directly. do-calculus is for:
-- Complex DAGs where standard criteria don't apply
-- Proving impossibility results (effect is NOT identified)
-- Research on identification theory
+#### Example: Deriving the Backdoor Adjustment Formula
+
+**Graph:**
+```
+    Confounder (C)
+         ↓        ↓
+    Treatment (X) → Outcome (Y)
+```
+
+**Goal:** Express P(Y | do(X)) in terms of observational probabilities.
+
+**Step 1:** Expand using the law of total probability:
+$$P(Y | do(X)) = \sum_c P(Y | do(X), C=c) \cdot P(C=c | do(X))$$
+
+**Step 2:** Apply Rule 2 to P(C | do(X)):
+- Check if (C ⊥ X) in G_X̄ (graph with arrows into X removed)
+- Yes! C has no parents, so it's independent of the intervention on X
+- Therefore: P(C | do(X)) = P(C)
+
+Now we have:
+$$P(Y | do(X)) = \sum_c P(Y | do(X), C=c) \cdot P(C)$$
+
+**Step 3:** Apply Rule 2 to P(Y | do(X), C):
+- After conditioning on C, the backdoor path is blocked
+- So: P(Y | do(X), C) = P(Y | X, C)
+
+**Final result:**
+$$P(Y | do(X)) = \sum_c P(Y | X, C=c) \cdot P(C)$$
+
+This is the **backdoor adjustment formula** — derived using do-calculus!
+
+### Practical Use
+
+**For most applications, you don't need to manually apply do-calculus.** Instead:
+
+1. **Draw your causal graph** (DAG)
+2. **Use software** (e.g., `dowhy` in Python, `dagitty` in R) to check identifiability
+3. **The software applies do-calculus** behind the scenes
+4. **You get back:** either an identification formula or a message that the effect is non-identifiable
+
+**When to learn do-calculus deeply:**
+- You're doing causal inference research
+- You're designing new identification algorithms
+- You want to deeply understand *why* certain effects are/aren't identifiable
+
+**For practitioners:**
+- Understand the intuition: it's about systematically removing "do" operators
+- Know the three rules exist and what they do
+- Use software tools that implement do-calculus for you
+
+**Key insight:** Pearl proved that do-calculus is **complete** — if a causal effect is identifiable from a graph, do-calculus can derive it. If do-calculus fails to identify it, it's truly non-identifiable.
 
 ---
 
