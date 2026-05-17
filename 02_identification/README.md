@@ -43,6 +43,20 @@ Learn when and how causal effects can be identified from observational data usin
 - Affects treatment but not outcome (except through treatment)
 - Not affected by confounders
 
+## Data Requirements
+
+This module uses the **LaLonde Job Training dataset** for practical examples.
+
+**To download the data:**
+```bash
+cd datasets/lalonde
+python download_data.py
+```
+
+Or manually from: [NBER Data Repository](https://users.nber.org/~rdehejia/data/.nswdata2.html)
+
+See [`datasets/lalonde/README.md`](../datasets/lalonde/README.md) for full documentation.
+
 ## Estimated Time
 **2 weeks** (10-12 hours total)
 

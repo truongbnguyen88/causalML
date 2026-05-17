@@ -296,17 +296,43 @@ When user requests changes (e.g., "Add more examples to the DAG notebook"):
 
 ## Dataset Usage Guidelines
 
-### Synthetic Data
-- **Use for**: Teaching specific concepts with known ground truth
+### CRITICAL: Prefer Real or Realistic Datasets
+
+**When creating learning notebooks:**
+1. **Always search for real or realistic datasets first** before generating synthetic data
+2. **Check existing sources**: Kaggle, UCI ML Repository, academic papers, government datasets, R/Python libraries
+3. **Add datasets to `datasets/` directory** with proper documentation
+4. **Provide context**: Explain the dataset's origin, variables, and why it's relevant for the concept being taught
+
+**Priority order:**
+1. **Real datasets** (e.g., LaLonde, IHDP, published research data)
+2. **Realistic semi-synthetic datasets** (real covariates + simulated treatment/outcome with known ground truth)
+3. **Fully synthetic data** (only when concepts require complete control or no suitable real data exists)
+
+### Synthetic Data (Use sparingly)
+- **Use for**: Teaching specific concepts with known ground truth when no real data is available
 - **Generation**: Include data generation code in notebooks
 - **Parameters**: Make them adjustable to explore edge cases
 - **Ground Truth**: Always show true effects for comparison
+- **Label clearly**: Note in notebook that data is synthetic and explain why
 
 ### Real Datasets
 - **LaLonde**: Use for basic methods (Modules 3-4)
 - **IHDP**: Use for CATE/heterogeneity (Modules 5-6)
 - **Criteo**: Use for uplift modeling (Module 6)
 - **Twins**: Use for advanced topics (Module 7)
+- **Add more**: When creating notebooks, actively search for domain-appropriate real datasets.
+
+### Dataset Documentation
+When adding a new dataset to `datasets/`:
+1. **Create a README.md** in the dataset subdirectory explaining:
+   - Data source and citation
+   - Variables and their meanings
+   - Causal question the data can address
+   - Any preprocessing steps taken
+   - Known limitations or biases
+2. **Include data loading utilities** if needed
+3. **Provide examples** of how to use the dataset
 
 ### Data Loading
 - **Efficiency**: Load data once at notebook start
