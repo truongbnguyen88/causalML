@@ -460,5 +460,106 @@ Think of multiple strategies as **alternative paths to causal identification**, 
 
 ---
 
+## Common Pitfalls: Concrete Examples
 
-*These notes provide detailed explanations and examples to supplement the main identification strategies content.*
+### 1. Assuming Identification Without Justification
+
+**Example:**
+```python
+# Estimating effect of job training on wages
+model = LinearRegression()
+model.fit(data[['age', 'education', 'experience']], data['wage'])
+training_effect = model.coef_[0]  # "This is the causal effect!"
+```
+
+**Problem:** No DAG was drawn. What if motivation affects both training enrollment and wages? What if prior employment affects training access and future wages? Controlling for age, education, and experience may not be sufficient.
+
+---
+
+### 2. Controlling for Everything
+
+**Example:**
+```python
+# Effect of education on income
+# "Let me control for everything to be safe"
+controls = ['age', 'parent_income', 'ability_test', 
+            'first_job_salary',  # ← Mediator! (caused by education)
+            'spouse_education',  # ← Collider! (caused by income)
+            'current_city']      # ← Post-treatment! (caused by education)
+
+model.fit(data[controls + ['education']], data['income'])
+```
+
+**Problem:** 
+- `first_job_salary` is a mediator (education → first job → income) — controlling blocks the causal path
+- `spouse_education` is a collider (education → spouse education ← income) — controlling creates bias
+- `current_city` is post-treatment (education → career → city choice) — controlling blocks mechanism
+
+**Result:** Severely biased estimate, likely underestimating the true effect.
+
+---
+
+### 3. Assuming IV Validity Without Evidence
+
+**Example:**
+```python
+# Effect of exercise on weight loss
+# "I'll use gym proximity as an instrument!"
+iv_model = IV2SLS(dependent=data['weight_loss'],
+                   endog=data['exercise_hours'],
+                   instruments=data['distance_to_gym'])
+```
+
+**Problem:**
+- **Relevance:** Maybe okay (closer to gym → more exercise)
+- **Exclusion restriction violation:** Distance to gym might affect weight loss directly through walking/biking to work, neighborhood walkability, income level (wealthy neighborhoods have closer gyms AND healthier food)
+- **Independence violation:** People who live near gyms might be health-conscious and would lose weight regardless
+
+**No justification provided** for why exclusion restriction holds.
+
+---
+
+### 4. Ignoring Non-Identification
+
+**Example:**
+```python
+# DAG: U → Treatment → Outcome
+#      U → Outcome
+# where U is unmeasured
+
+# Analyst proceeds anyway:
+model = LinearRegression()
+model.fit(data[['treatment']], data['outcome'])
+effect = model.coef_[0]
+
+print(f"Causal effect: {effect:.2f}")  # Report with confidence!
+```
+
+**Problem:** With unmeasured confounder U and no valid instrument, the effect is **not identified**. The estimate is biased no matter how much data you have. Should report "effect is not identifiable from available data" instead.
+
+---
+
+### 5. Confusing Identification with Estimation
+
+**Example:**
+```python
+# Effect of drug on recovery, with unmeasured confounding
+model = LogisticRegression()
+model.fit(data[['drug']], data['recovery'])
+
+# Get a p-value < 0.05
+p_value = 0.003
+print(f"Statistically significant (p={p_value})! This proves causation!")
+```
+
+**Problem:** 
+- **Identification issue:** Unmeasured confounding (severity affects both drug prescription and recovery)
+- **Statistical significance** just means the *association* is not due to sampling error
+- You've precisely estimated a *biased* quantity
+- The true causal effect remains unknown
+
+**Correct interpretation:** "We found a strong association (p=0.003), but without controlling for disease severity, we cannot make causal claims."
+
+---
+
+*These notes provide detailed explanations and examples to supplement the main identification strategies content. For detailed do-Calculus explanations with concrete examples, see the do-Calculus section in `01_identification_strategies.md`.*

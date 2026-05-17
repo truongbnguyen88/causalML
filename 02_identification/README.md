@@ -14,9 +14,15 @@ Learn when and how causal effects can be identified from observational data usin
 
 ### Theory & Concepts
 - `01_identification_strategies.md` - Overview of identification approaches
+- `additional_notes.md` - Detailed examples for ignorability and using multiple strategies
 - `02_backdoor_adjustment.ipynb` - Backdoor criterion with examples
 - `03_frontdoor_criterion.ipynb` - Frontdoor adjustment examples
 - `04_instrumental_variables.ipynb` - IV intuition and applications
+- `05_identification_with_software.ipynb` - **[Planned]** Using DoWhy and dagitty for automated identification
+  - Automatically check identifiability given a DAG
+  - Compare manual backdoor criterion vs. automated identification
+  - Visualize DAGs and determine valid adjustment sets
+  - Examples where do-calculus finds identification when simple methods don't apply
 
 ### Exercises
 - `exercises/` - Practice problems with solutions
